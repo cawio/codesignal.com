@@ -5,14 +5,16 @@ function boxesPacking(length: number[], width: number[], height: number[]) {
         dimensions.sort((a: number, b: number) => a - b);
         boxes.push(dimensions);
     }
-    boxes
-    boxes.sort(checkFit)
-    boxes
+
+    boxes.sort(checkFit);
+    
     for (let i = 1; i < boxes.length; i++){
         if (checkFit(boxes[i - 1], boxes[i]) === 0) {
             return false;
         }
     }
+
+    // i need to add more code here 
     return true
 }
 

@@ -1,6 +1,7 @@
 function holiday(x: number, weekDay: string, month: string, yearNumber: number): number {
     /*
         holiday is on xth week of month on weekday
+        apparently xth weekDay in month is searched
     */
 
     const dayArray: string[] = [
@@ -31,10 +32,21 @@ function holiday(x: number, weekDay: string, month: string, yearNumber: number):
     const dateString: string = String(yearNumber)+'/'+month+'/1 12:00';
     const date: Date = new Date(dateString);
     
+    // while(date.getMonth() === Number(month) -1) {
+    //     const weekNumber: number = getWeekNo(date);
+    //     console.log(date, weekNumber);
+    //     if (getWeekNo(date) === x && date.getDay() === Number(weekDay)) {
+    //         return date.getDate();
+    //     }
+    //     date.setDate(date.getDate() + 1)
+    // }
+
+    let count: number = 0;
     while(date.getMonth() === Number(month) -1) {
-        const weekNumber: number = getWeekNo(date);
-        console.log(date, weekNumber);
-        if (getWeekNo(date) === x && date.getDay() === Number(weekDay)) {
+        if (date.getDay() === Number(weekDay)) {
+            count++;
+        }
+        if (count === x) {
             return date.getDate();
         }
         date.setDate(date.getDate() + 1)
@@ -43,14 +55,19 @@ function holiday(x: number, weekDay: string, month: string, yearNumber: number):
     return -1;
 }
     
-// https://stackoverflow.com/questions/5974798/how-to-find-week-of-month-for-calendar-which-starts-from-monday
-function getWeekNo(date: Date): number {
-    let day: number = date.getDate();
-    //get weekend date
-    day += (date.getDay() == 0 ? 0 : 7 - date.getDay());
-  
-    return Math.ceil(day / 7);
-}
+// function getWeekNo(date: Date): number {
+//     let day: number = date.getDate();
+//     console.log(day);
+//     //get weekend date
+//     day += (date.getDay() == 0 ? 0 : 7 - date.getDay());
+//     console.log(day);
+//     return Math.ceil(day / 7);
+// }
 
-// console.log(16, holiday(3, 'Wednesday', 'November', 2016));
-console.log(20, holiday(3, 'Thursday', 'January', 2101));
+console.log(
+    16, 
+    holiday(3, 'Wednesday', 'November', 2016));
+
+console.log(
+    20, 
+    holiday(3, 'Thursday', 'January', 2101));

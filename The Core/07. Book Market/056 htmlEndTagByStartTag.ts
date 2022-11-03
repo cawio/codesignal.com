@@ -8,7 +8,7 @@ function htmlEndTag(startTag: string): string {
     //     tagName += currChar;
     // }
 
-    // return "</" + tagName + ">";;
+    // return "</" + tagName + ">";
     
     const pattern: RegExp = /\w+/;
 

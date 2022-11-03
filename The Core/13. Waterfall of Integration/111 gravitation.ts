@@ -1,4 +1,4 @@
-function solution(rows: string[]): number[] {
+function gravitation(rows: string[]): number[] {
     // transform to columns
     let result: number[] = [];
     let onlyDotsString: string = ''.padEnd(rows.length, '.');

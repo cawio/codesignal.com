@@ -4,7 +4,7 @@ function holiday(x: number, weekDay: string, month: string, yearNumber: number):
         apparently xth weekDay in month is searched
     */
 
-    const dayArray: string[] = [
+    const dayMap: string[] = [
         'Sunday', 
         'Monday',
         'Tuesday',
@@ -13,7 +13,7 @@ function holiday(x: number, weekDay: string, month: string, yearNumber: number):
         'Friday',
         'Saturday'];
             
-    const monthArray: string[] = [
+    const monthMap: string[] = [
         'January',
         'February',
         'March',
@@ -27,8 +27,8 @@ function holiday(x: number, weekDay: string, month: string, yearNumber: number):
         'November',
         'December'];
             
-    weekDay = String(dayArray.indexOf(weekDay)).padStart(2, '0');
-    month = String(monthArray.indexOf(month) + 1).padStart(2, '0');
+    weekDay = String(dayMap.indexOf(weekDay)).padStart(2, '0');
+    month = String(monthMap.indexOf(month) + 1).padStart(2, '0');
     const dateString: string = String(yearNumber)+'/'+month+'/1 12:00';
     const date: Date = new Date(dateString);
     

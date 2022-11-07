@@ -1,19 +1,20 @@
 function htmlTable(table: string, row: number, column: number): string {
-    const rowStart: string = '<tr>';
-    const rowEnd: string   = '</tr>';
+    // remove th
     const thStart: string  = '<th>';
     const thEnd: string    = '</th>';
-
     let scuffedRows: string[] = [];
-    // remove th
     while(table.includes(thStart)) {
-        table = table.slice(0, table.indexOf(thStart) - 4).concat(table.slice(table.indexOf(thEnd) + 1));
+        table = table.slice(0, table.indexOf(thStart)).concat(table.slice(table.indexOf(thEnd) + 5));
     }
+
     // split into rows
+    const rowStart: string = '<tr>';
+    const rowEnd: string   = '</tr>';
     while(table.includes(rowStart)) {
-        scuffedRows.push(table.slice(table.indexOf(rowStart), table.indexOf(rowEnd)));
+        scuffedRows.push(table.slice(table.indexOf(rowStart) + 4, table.indexOf(rowEnd)));
         table = table.slice(table.indexOf(rowEnd) + 1);
     }
+
     // extract table content
     let fixedRows: string[][] = scuffedRows.map((row: string) => {
         row = row.replace(/<[\w\/]+>/g, ' ');
@@ -23,7 +24,7 @@ function htmlTable(table: string, row: number, column: number): string {
             .filter((el: string) => el != '');
     });
 
-    if (row > fixedRows.length - 1 || column > fixedRows[0].length - 1) {
+    if (row > fixedRows.length - 1 || column > fixedRows[row].length - 1) {
         return 'No such cell';
     }
 
@@ -42,20 +43,20 @@ const task148_1: Task148 = {
     r: 0,
     c: 1,
 };
-// console.log(
-//     htmlTable(task148_1.t, task148_1.r, task148_1.c),
-//     "TWO"
-// );
+console.log(
+    htmlTable(task148_1.t, task148_1.r, task148_1.c),
+    "TWO"
+);
 
 const task148_7: Task148 = {
     t: "<table><tr><th>CIRCUMFERENCE</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr><tr><td>BITS</td><td>3</td><td>4</td><td>8</td><td>10</td><td>12</td><td>15</td></tr></table>",
     r: 0,
     c: 6
 };
-// console.log(
-//     htmlTable(task148_7.t, task148_7.r, task148_7.c),
-//     "No such cell"
-// );
+console.log(
+    htmlTable(task148_7.t, task148_7.r, task148_7.c),
+    "No such cell"
+);
 
 const task148_14: Task148 = {
     t: "<table><tr><th>CIRCUMFERENCE</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr><tr><td>BITS</td><td>3</td><td>4</td><td>8</td><td>10</td><td>12</td><td>15</td></tr></table>",

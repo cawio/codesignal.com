@@ -5,6 +5,11 @@ class Task150 {
         private coords: number[][],
         private expOut: string[]
     ) {}
+    
+    mapTable(table: string[]): number[][] {
+        // i want an array that at index 0 show the start of row 0 so i: 0 r: 1
+        
+    }    
 
     try(): string {
         const testPassed: boolean = this.expOut === cellsJoining(this.table, this.coords);
@@ -37,5 +42,5 @@ const task150_1: Task150 = new Task150(
      "|       +-----+----+", 
      "|asdf ~~|ghjkl|100$|",
      "+-------+-----+----+"]
-)
+);
 console.log(task150_1.try());

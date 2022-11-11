@@ -38,17 +38,17 @@ class Befunge93 {
         
         let stack: number[] = [];
         const safePop = (): number => {
-            let n = stack.pop();
+            let n: number | undefined = stack.pop();
             if (n == undefined) {
                 n = 0;
-            }
+            } 
             
             return n;
-        }
+        }       
 
         let output: string = '';
         for (let i = 0; i < 10e5; i++) {
-            let c: string = this.programm[row][col];   
+            let c: string = this.programm[row][col]; // command
             let a: number = 0;
             let b: number = 0;      
             if (c == '^') {
@@ -73,8 +73,8 @@ class Befunge93 {
                 // pop a value; move down if value = 0, up otherwise
                 if (safePop() == 0) {
                     d = Step.Down;
-                    d = Step.Up;
                 } else {
+                    d = Step.Up;
                 }
             } else if (c == '+') {
                 // addition; pop a, pop b, then push a + b

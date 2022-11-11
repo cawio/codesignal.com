@@ -36,20 +36,21 @@ class Befunge93 {
             }
         }
         
-        const pop = (): number | undefined => {
-            if (stack.length > 0) {
-                return stack.pop();
-            } else {
-                return 0;
+        let stack: number[] = [];
+        const safePop = (): number => {
+            let n = stack.pop();
+            if (n == undefined) {
+                n = 0;
             }
+            
+            return n;
         }
 
-        let stack: number[] = [];
         let output: string = '';
         for (let i = 0; i < 10e5; i++) {
             let c: string = this.programm[row][col];   
-            let a: number | undefined = 0;
-            let b: number | undefined = 0;      
+            let a: number = 0;
+            let b: number = 0;      
             if (c == '^') {
                 d = 1;
             } else if (c == 'v') {
@@ -63,56 +64,46 @@ class Befunge93 {
                 step(d);
             } else if (c == '_') {
                 // pop a value; move right if value = 0, left otherwise
-                if (pop() == 0) {
+                if (safePop() == 0) {
                     d = Step.Right;
                 } else {
                     d = Step.Left;
                 }
             } else if (c == '|') {
                 // pop a value; move down if value = 0, up otherwise
-                if (pop() == 0) {
+                if (safePop() == 0) {
                     d = Step.Down;
-                } else {
                     d = Step.Up;
+                } else {
                 }
             } else if (c == '+') {
                 // addition; pop a, pop b, then push a + b
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    stack.push(a + b);
-                }
+                a = safePop();
+                b = safePop();
+                stack.push(a + b);
             } else if (c == '-') {
                 // subtraction; pop a, pop b, then push b - a
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    stack.push(b - a);
-                }
+                a = safePop();
+                b = safePop();
+                stack.push(b - a);
             } else if (c == '*') {
                 // multiplication; pop a, pop b, then push a * b
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    stack.push(a * b);
-                }
+                a = safePop();
+                b = safePop();
+                stack.push(a * b);
             } else if (c == '/') {
                 // integer division; pop a, pop b, then push b / a
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    stack.push(Math.trunc(b / a));
-                }
+                a = safePop();
+                b = safePop();
+                stack.push(Math.trunc(b / a));
             }  else if (c == '%') {
                 // modulo operation; pop a, pop b, then push b % a
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    stack.push(b % a);
-                }
+                a = safePop();
+                b = safePop();
+                stack.push(b % a);
             } else if (c == '!') {
                 // logical NOT; pop a value, if the value = 0, push 1, otherwise push 0
-                a = pop();
+                a = safePop();
                 if (a == 0) {
                     stack.push(1);
                 } else {
@@ -120,42 +111,34 @@ class Befunge93 {
                 }
             }  else if (c == '`') {
                 // greater than; pop a and b, then push 1 if b > a, otherwise 0
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    if (b > a) {
-                        stack.push(1);
-                    } else {
-                        stack.push(0);
-                    }
+                a = safePop();
+                b = safePop();
+                if (b > a) {
+                    stack.push(1);
+                } else {
+                    stack.push(0);
                 }
             } else if (c == ':') {
                 // duplicate value on top of the stack
-                a = pop();
-                if (a != undefined) {
-                    stack.push(a, a);
-                }
+                a = safePop();
+                stack.push(a, a);
             } else if (c == '\\') {
                 // swap the top stack value with the second to the top
-                a = pop();
-                b = pop();
-                if (a != undefined && b != undefined) {
-                    stack.push(a, b);
-                }
+                a = safePop();
+                b = safePop();
+                stack.push(a, b);
             } else if (c == '$') {
                 // pop value from the stack and discard it
-                pop();
+                safePop();
             } else if (c == '.') {
                 // pop value and output it as an integer followed by a space
-                output = output.concat(String(pop()), ' ');
+                output = output.concat(String(safePop()), ' ');
             } else if (c == ',') {
                 // pop value and output it as ASCII character
-                a = pop();
-                if (a != undefined) {
-                    output = output.concat(String.fromCharCode(a));
-                }
+                a = safePop();
+                output = output.concat(String.fromCharCode(a));
             } else if ('0123456789'.indexOf(c) != -1) {
-                //  push the encountered number on the stack
+                // push the encountered number on the stack
                 stack.push(Number(c));
             } else if (c == '"') {
                 // start string mode; push each character's ASCII value all the way up to the next "

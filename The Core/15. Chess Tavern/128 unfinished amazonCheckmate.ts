@@ -1,12 +1,12 @@
 class Task128 {
     constructor (
-        readonly testId: number,
+        readonly id: number,
         readonly king: string,
         readonly amazon: string,
         readonly expOut: number[]
     ) {}
 
-    whiteAmazonReaches() {
+    private whiteAmazonReaches() {
         // amazon can move like a queen and a kight
         let moves: string[] = [];
         moves = moves.concat(
@@ -17,11 +17,11 @@ class Task128 {
         return moves.filter((pos: string, i: number) => moves.indexOf(pos) === i);
     }
 
-    whiteKingReaches(): string[] {
+    private whiteKingReaches(): string[] {
         return this.kingMoves(this.king);
     }
 
-    kingMoves(pos: string): string[] {
+    private kingMoves(pos: string): string[] {
         // king can capture everything standing in any square surrouding him
         const offset: number[][] = [[-1, -1],
                                     [-1,  0],
@@ -55,7 +55,7 @@ class Task128 {
         return moves;
     }
 
-    queenMoves(pos: string): string[] {
+    private queenMoves(pos: string): string[] {
         const x: number = pos.charCodeAt(0);
         const y: number = Number(pos.charAt(1));
         let moves: string[] = [];
@@ -103,7 +103,7 @@ class Task128 {
         return moves;
     }
 
-    knightMoves(pos: string): string[] {
+    private knightMoves(pos: string): string[] {
         const offsets: number[][] = [[-1,  2],
                                      [-2,  1],
                                      [-2, -1],
@@ -130,7 +130,7 @@ class Task128 {
         return moves;
     }
 
-    isValidPosition(s: string): boolean {
+    private isValidPosition(s: string): boolean {
         // a-h
         const xCode: number = s.charCodeAt(0);
         let validX: boolean = true;
@@ -148,26 +148,37 @@ class Task128 {
         return validX && validY;
     }
 
-    chessToNum(pos: string): number[] {
-        const map: string[] = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        return [Number(pos.charAt(1)), map.indexOf(pos.charAt(0))];
+    private chessToNum(pos: string): number[] {
+        const map: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        return [Number(pos.charAt(1)) - 1, map.indexOf(pos.charAt(0))]; // [row, col];
     }
 
-    amazonCheckmate(king: string, amazon: string): number[] {
-        
+    public solution(): number[] {
+        let board: string[][] = [];
+        for(let i = 0; i < 8; i++) {
+            board[i] = [];
+            for(let j = 0; j < 8; j++) {
+                board[i][j] = '';
+            }
+        }
+        let inReachOfAmazon: number[][] = this.whiteAmazonReaches().map((el => this.chessToNum(el)));
+        inReachOfAmazon.forEach((pos: number[], i) => {
+            board[pos[0]][pos[1]] = 'X';
+        })
+        board.reverse();
+        console.table(board);
+
+        let savePos = ;
         return [];
     }
 
-    try(): string {
-        const testPassed: boolean = this.expOut === this.amazonCheckmate(this.king, this.amazon);
-        return `Test ${this.testId}: ${testPassed ? 'passed 😎' : 'failed 😢'}`;
-    }
+    public try(): string {
+        const testPassed: boolean = this.expOut === this.solution();
+    return `Test ${String(this.id).padStart(2, '0')}: ${testPassed ? 'passed 😊' : 'failed 😣'}`;
+}
 }
 
-const task128_1: Task128 = new Task128(
-    1,
-    'd3',
-    'e4',
-    [5, 21, 0, 29]
-);
-console.log(task128_1.try());
+const task128Tasks: Task128[] = [
+    new Task128(1, 'd3', 'e4', [5, 21, 0, 29]),
+];
+task128Tasks.forEach((el: Task128) => console.log(el.try()));

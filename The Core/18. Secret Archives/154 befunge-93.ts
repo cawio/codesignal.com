@@ -6,14 +6,11 @@ class Befunge93 {
     ) {}
 
     public solution(): string {
-        let height: number = this.programm.length;
-        let width: number = this.programm[0].length;
-        
-        
-        // 1 = Up, 2 = Down, 3 = Right, 4 = Left
+        const height: number = this.programm.length;
+        const width: number = this.programm[0].length;
         let row: number = 0;
         let col: number = 0;
-        let d: number = 3;
+        let d: number = 3; // 1 = Up; 2 = Down; 3 = Right (default); 4 = Left
         
         const stepUp    = () => row = row - 1 < 0 ? height - 1 : row - 1; 
         const stepDown  = () => row = row + 1 == height ? 0 :  row + 1;
@@ -26,7 +23,7 @@ class Befunge93 {
             Right,
             Left
         }
-        
+
         const step = (d: number): void => {
             if (d == Step.Up) {
                 stepUp();
@@ -50,7 +47,9 @@ class Befunge93 {
         let stack: number[] = [];
         let output: string = '';
         for (let i = 0; i < 10e5; i++) {
-            let c: string = this.programm[row][col];            
+            let c: string = this.programm[row][col];   
+            let a: number | undefined = 0;
+            let b: number | undefined = 0;      
             if (c == '^') {
                 d = 1;
             } else if (c == 'v') {
@@ -78,42 +77,42 @@ class Befunge93 {
                 }
             } else if (c == '+') {
                 // addition; pop a, pop b, then push a + b
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     stack.push(a + b);
                 }
             } else if (c == '-') {
                 // subtraction; pop a, pop b, then push b - a
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     stack.push(b - a);
                 }
             } else if (c == '*') {
                 // multiplication; pop a, pop b, then push a * b
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     stack.push(a * b);
                 }
             } else if (c == '/') {
                 // integer division; pop a, pop b, then push b / a
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     stack.push(Math.trunc(b / a));
                 }
             }  else if (c == '%') {
                 // modulo operation; pop a, pop b, then push b % a
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     stack.push(b % a);
                 }
             } else if (c == '!') {
                 // logical NOT; pop a value, if the value = 0, push 1, otherwise push 0
-                let a: number | undefined = pop();
+                a = pop();
                 if (a == 0) {
                     stack.push(1);
                 } else {
@@ -121,8 +120,8 @@ class Befunge93 {
                 }
             }  else if (c == '`') {
                 // greater than; pop a and b, then push 1 if b > a, otherwise 0
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     if (b > a) {
                         stack.push(1);
@@ -132,14 +131,14 @@ class Befunge93 {
                 }
             } else if (c == ':') {
                 // duplicate value on top of the stack
-                let a: number | undefined = pop();
+                a = pop();
                 if (a != undefined) {
                     stack.push(a, a);
                 }
             } else if (c == '\\') {
                 // swap the top stack value with the second to the top
-                let a: number | undefined = pop();
-                let b: number | undefined = pop();
+                a = pop();
+                b = pop();
                 if (a != undefined && b != undefined) {
                     stack.push(a, b);
                 }
@@ -151,7 +150,7 @@ class Befunge93 {
                 output = output.concat(String(pop()), ' ');
             } else if (c == ',') {
                 // pop value and output it as ASCII character
-                let a: number | undefined = pop();
+                a = pop();
                 if (a != undefined) {
                     output = output.concat(String.fromCharCode(a));
                 }
@@ -161,7 +160,7 @@ class Befunge93 {
             } else if (c == '"') {
                 // start string mode; push each character's ASCII value all the way up to the next "
                 step(d);
-                c = this.programm[row][col]
+                c = this.programm[row][col];
                 while (c != '"' ) {
                     stack.push(c.charCodeAt(0));
                     step(d);

@@ -1,25 +1,23 @@
-class Task155 {
-    constructor (
-        private state: string[],
-        private expOut: number
-    ) {}
+// class PipesGame {
+//     constructor (
+//         private id: number,
+//         private state: string[],
+//         private expOut: number
+//     ) {}
+//     private solution(state: string[]): number {
 
-    getResults(): string {
-        return `expOut: ${this.expOut} myOut: ${pipesGame(this.state)}`;
-    }
-}
+//         return 0;
+//     }
 
-function pipesGame(state: string[]): number {
+//     public try(): string {
+//         const testPassed: boolean = this.expOut == this.solution(this.state);
+//         return `Test ${this.id}: ${testPassed ? 'passed 😎' : 'failed 😢'}`;
+//     }
+// }
 
-    return 0;
-}
 
-const task155_1: Task155 = new Task155(
-    ["a224C22300000", 
-     "0001643722B00", 
-     "0b27275100000", 
-     "00c7256500000", 
-     "0006A45000000"],
-     19
-)
-console.log(task155_1.getResults());
+// const task155Tests: PipesGame[] = [
+//     new PipesGame(1, ["a224C22300000", "0001643722B00",  "0b27275100000", "00c7256500000", "0006A45000000"], 19)
+// ];
+
+// task155Tests.forEach((el: PipesGame) => console.log(el.try()));

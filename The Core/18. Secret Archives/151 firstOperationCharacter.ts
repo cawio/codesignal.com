@@ -37,19 +37,24 @@ class FirstOpChar {
             }
         });
 
-        const deepestLevel: TokenObj[] = levels[levels.length - 1].filter((el: TokenObj) => isNaN(Number(el.token)));
+        let deepestLevel: TokenObj[] = levels[levels.length - 1].filter((el: TokenObj) => isNaN(Number(el.token)));
 
         if (deepestLevel.length == 1) {
             return deepestLevel[0].i;
         }
-        deepestLevel
-        if (deepestLevel.some((el: TokenObj) => el.token == '*')) {
-            // filter out + and return TokenObj with smallest index
-        } else {
-            // return smallest index
-        }
 
-        return deepestLevel[0].i;
+        if (deepestLevel.some((el: TokenObj) => el.token == '*')) {
+            // filter out + and return i of TokenObj with smallest index
+            deepestLevel = deepestLevel
+                .filter((el: TokenObj) => el.token != '+')
+                .sort((a: TokenObj, b: TokenObj) => a.i - b.i);
+
+            return deepestLevel[0].i;
+        } else {
+            // return i of TokenObj with smallest index
+            deepestLevel = deepestLevel.sort((a: TokenObj, b: TokenObj) => a.i - b.i);
+            return deepestLevel[0].i;
+        }
     }
 
     public try(): string {
@@ -59,7 +64,7 @@ class FirstOpChar {
 }
 
 let task151Tests: FirstOpChar[] = [
-    // new FirstOpChar(1, "(2 + 2) * 2", 3),
+    new FirstOpChar(1, "(2 + 2) * 2", 3),
     new FirstOpChar(3, "((2 + 2) * 2) * 3 + (2 + (2 * 2))", 28),
 ];
 task151Tests.forEach((el: FirstOpChar) => console.log(el.try()));

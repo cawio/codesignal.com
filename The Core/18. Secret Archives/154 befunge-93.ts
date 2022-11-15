@@ -60,7 +60,7 @@ class Befunge93 {
         return n;
     }
 
-    runProgram(): string {
+    public runProgram(): string {
         let d = Step.Right; // 1 = Up; 2 = Down; 3 = Right (default); 4 = Left
         let stopProgram = false;
         for (let i = 0; i < 10e5; i++) {
@@ -208,7 +208,7 @@ class Befunge93 {
                     stopProgram = true;
                     break;
                 default:
-                    throw new Error('Error: command not included in Interpretor')
+                    throw new Error('Error: command not included in Interpretor');
             }
 
             if (this.output.length > 99 || stopProgram) {
@@ -222,7 +222,7 @@ class Befunge93 {
     }
 
     public try(): string {
-            const testPassed: boolean = this.expOut === this.runProgram();
+        const testPassed: boolean = this.expOut === this.runProgram();
         return `Test ${String(this.id).padStart(2, '0')}: ${testPassed ? 'passed 😊' : 'failed 😣'}`;
     }
 }

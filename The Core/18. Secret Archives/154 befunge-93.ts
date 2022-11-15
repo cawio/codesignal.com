@@ -6,12 +6,12 @@ enum Step {
 }
 
 class Befunge93 {
-    height: number = 0;
-    width: number = 0;
-    row: number = 0;
-    col: number = 0;
-    d: number = 3; // 1 = Up; 2 = Down; 3 = Right (default); 4 = Left
-    output: string = '';
+    height = 0;
+    width = 0;
+    row = 0;
+    col = 0;
+
+    output = '';
     stack: number[] = [];
 
     constructor (
@@ -60,128 +60,169 @@ class Befunge93 {
         return n;
     }
 
-    get solution(): string {
+    runProgram(): string {
+        let d = Step.Right; // 1 = Up; 2 = Down; 3 = Right (default); 4 = Left
+        let stopProgram = false;
         for (let i = 0; i < 10e5; i++) {
-            let c: string = this.programm[this.row][this.col]; // command
-            let a: number = 0;
-            let b: number = 0;
-            if (c == '^') {
-                this.d = 1;
-            } else if (c == 'v') {
-                this.d = 2;
-            } else if (c == '>') {
-                this.d = 3;
-            } else if (c == '<') {
-                this.d = 4;
-            } else if (c == '#') {
-                // bridge; skip next cell
-                this.step(this.d);
-            } else if (c == '_') {
-                // pop a value; move right if value = 0, left otherwise
-                if (this.safePop() == 0) {
-                    this.d = Step.Right;
-                } else {
-                    this.d = Step.Left;
-                }
-            } else if (c == '|') {
-                // pop a value; move down if value = 0, up otherwise
-                if (this.safePop() == 0) {
-                    this.d = Step.Down;
-                } else {
-                    this.d = Step.Up;
-                }
-            } else if (c == '+') {
-                // addition; pop a, pop b, then push a + b
-                a = this.safePop();
-                b = this.safePop();
-                this.stack.push(a + b);
-            } else if (c == '-') {
-                // subtraction; pop a, pop b, then push b - a
-                a = this.safePop();
-                b = this.safePop();
-                this.stack.push(b - a);
-            } else if (c == '*') {
-                // multiplication; pop a, pop b, then push a * b
-                a = this.safePop();
-                b = this.safePop();
-                this.stack.push(a * b);
-            } else if (c == '/') {
-                // integer division; pop a, pop b, then push b / a
-                a = this.safePop();
-                b = this.safePop();
-                this.stack.push(Math.trunc(b / a));
-            }  else if (c == '%') {
-                // modulo operation; pop a, pop b, then push b % a
-                a = this.safePop();
-                b = this.safePop();
-                this.stack.push(b % a);
-            } else if (c == '!') {
-                // logical NOT; pop a value, if the value = 0, push 1, otherwise push 0
-                a = this.safePop();
-                if (a == 0) {
-                    this.stack.push(1);
-                } else {
-                    this.stack.push(0);
-                }
-            }  else if (c == '`') {
-                // greater than; pop a and b, then push 1 if b > a, otherwise 0
-                a = this.safePop();
-                b = this.safePop();
-                if (b > a) {
-                    this.stack.push(1);
-                } else {
-                    this.stack.push(0);
-                }
-            } else if (c == ':') {
-                // duplicate value on top of the stack
-                a = this.safePop();
-                this.stack.push(a, a);
-            } else if (c == '\\') {
-                // swap the top stack value with the second to the top
-                a = this.safePop();
-                b = this.safePop();
-                this.stack.push(a, b);
-            } else if (c == '$') {
-                // pop value from the stack and discard it
-                this.safePop();
-            } else if (c == '.') {
-                // pop value and output it as an integer followed by a space
-                this.output = this.output.concat(String(this.safePop()), ' ');
-            } else if (c == ',') {
-                // pop value and this.output it as ASCII character
-                a = this.safePop();
-                this.output = this.output.concat(String.fromCharCode(a));
-            } else if ('0123456789'.indexOf(c) != -1) {
-                // push the encountered number on the stack
-                this.stack.push(Number(c));
-            } else if (c == '"') {
-                // start string mode; push each character's ASCII value all the way up to the next "
-                this.step(this.d);
-                c = this.programm[this.row][this.col];
-                while (c != '"' ) {
-                    this.stack.push(c.charCodeAt(0));
-                    this.step(this.d);
+            let c = this.programm[this.row][this.col]; // command
+            let a = 0;
+            let b = 0;
+            switch(c) {
+                case '^':
+                    // change direction: step up
+                    d = Step.Up;
+                    break;
+                case 'v':
+                    // change direction: step down
+                    d = Step.Down;
+                    break;
+                case '>':
+                    // change direction: step right
+                    d = Step.Right;
+                    break;
+                case '<':
+                    // change direction: step left
+                    d = Step.Left;
+                    break;
+                case '#':
+                    // bridge; skip next cell
+                    this.step(d);
+                    break;
+                case '_':
+                    // pop a value; move right if value = 0, left otherwise
+                    if (this.safePop() == 0) {
+                        d = Step.Right;
+                    } else {
+                        d = Step.Left;
+                    }
+                    break;
+                case '|':
+                    // pop a value; move down if value = 0, up otherwise
+                    if (this.safePop() == 0) {
+                        d = Step.Down;
+                    } else {
+                        d = Step.Up;
+                    }
+                    break;
+                case '+':
+                    // addition; pop a, pop b, then push a + b
+                    a = this.safePop();
+                    b = this.safePop();
+                    this.stack.push(a + b);
+                    break;
+                case '-':
+                    // subtraction; pop a, pop b, then push b - a
+                    a = this.safePop();
+                    b = this.safePop();
+                    this.stack.push(b - a);
+                    break;
+                case '*':
+                    // multiplication; pop a, pop b, then push a * b
+                    a = this.safePop();
+                    b = this.safePop();
+                    this.stack.push(a * b);
+                    break;
+                case '/':
+                    // integer division; pop a, pop b, then push b / a
+                    a = this.safePop();
+                    b = this.safePop();
+                    this.stack.push(Math.trunc(b / a));
+                    break;
+                case '%':
+                    // modulo operation; pop a, pop b, then push b % a
+                    a = this.safePop();
+                    b = this.safePop();
+                    this.stack.push(b % a);
+                    break;
+                case '!':
+                    // logical NOT; pop a value, if the value = 0, push 1, otherwise push 0
+                    a = this.safePop();
+                    if (a == 0) {
+                        this.stack.push(1);
+                    } else {
+                        this.stack.push(0);
+                    }
+                    break;
+                case '`':
+                    // greater than; pop a and b, then push 1 if b > a, otherwise 0
+                    a = this.safePop();
+                    b = this.safePop();
+                    if (b > a) {
+                        this.stack.push(1);
+                    } else {
+                        this.stack.push(0);
+                    }
+                    break;
+                case ':':
+                    // duplicate value on top of the stack
+                    a = this.safePop();
+                    this.stack.push(a, a);
+                    break;
+                case '\\':
+                    // swap the top stack value with the second to the top
+                    a = this.safePop();
+                    b = this.safePop();
+                    this.stack.push(a, b);
+                    break;
+                case '$':
+                    // pop value from the stack and discard it
+                    this.safePop();
+                    break;
+                case '.':
+                    // pop value and output it as an integer followed by a space
+                    this.output = this.output.concat(String(this.safePop()), ' ');
+                    break;
+                case ',':
+                    // pop value and this.output it as ASCII character
+                    a = this.safePop();
+                    this.output = this.output.concat(String.fromCharCode(a));
+                    break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    // push the encountered number on the stack
+                    this.stack.push(Number(c));
+                    break;
+                case '"':
+                    // start string mode; push each character's ASCII value all the way up to the next "
+                    this.step(d);
                     c = this.programm[this.row][this.col];
-                }
-            } else if (c == ' ') {
-                // empty instruction; does nothing
-            } else if (c == '@') {
-                // end program; the program output should be returned then
+                    while (c != '"' ) {
+                        this.stack.push(c.charCodeAt(0));
+                        this.step(d);
+                        c = this.programm[this.row][this.col];
+                    }
+                    break;
+                case ' ':
+                    // empty instruction; does nothing
+                    break;
+                case '@':
+                    // end program; the program output should be returned then
+                    stopProgram = true;
+                    break;
+                default:
+                    throw new Error('Error: command not included in Interpretor')
+            }
+
+            if (this.output.length > 99 || stopProgram) {
                 break;
             }
 
-            if ( this.output.length > 99) {
-                break;
-            }
-
-            this.step(this.d);
+            this.step(d);
         }
 
         return this.output;
     }
 
     public try(): string {
-            const testPassed: boolean = this.expOut === this.solution;
+            const testPassed: boolean = this.expOut === this.runProgram();
         return `Test ${String(this.id).padStart(2, '0')}: ${testPassed ? 'passed 😊' : 'failed 😣'}`;
     }
 }

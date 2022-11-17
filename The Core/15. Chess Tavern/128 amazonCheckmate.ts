@@ -14,7 +14,7 @@ class AmazonCheckmate {
             this.knightMoves(this.amazon)
         )
 
-        
+
         return moves.filter((pos: string, i: number) => moves.indexOf(pos) === i);
     }
 
@@ -33,7 +33,7 @@ class AmazonCheckmate {
         // and 1-8 vertically
         const kingX = pos.charCodeAt(0);
         const kingY = Number(pos.charAt(1));
-        
+
         let moves: string[] = [];
         offset.forEach((direction: number[]) => {
             // offset
@@ -43,14 +43,14 @@ class AmazonCheckmate {
             if (this.isValidPosition(cord1)) {
                 moves.push(cord1);
             }
-            
+
             // opposite offset
             const x2 = kingX + (-1 * direction[1]);
             const y2 = kingY + (-1 * direction[0]);
             const cord2 = String.fromCodePoint(x2) + String(y2);
             if (this.isValidPosition(cord2)) {
                 moves.push(cord2);
-            }	
+            }
         });
 
         return moves;
@@ -67,7 +67,7 @@ class AmazonCheckmate {
             }
             moves.push(String.fromCharCode(x) + String(i));
         }
-        
+
         // horizontally
         let charCode = 97;
         for (let i = 0; i < 8; i++) {
@@ -98,9 +98,9 @@ class AmazonCheckmate {
                 moves.push(tmpPos);
                 modX += direction[0];
                 modY += direction[1];
-            }            
+            }
         });
-        
+
         return moves;
     }
 
@@ -141,7 +141,7 @@ class AmazonCheckmate {
 
         // 1-8
         const y = Number(s.substring(1));
-        let validY = true; 
+        let validY = true;
         if (y < 1 || y > 8) {
             validY = false;
         }
@@ -176,8 +176,6 @@ class AmazonCheckmate {
             board[pos[0]][pos[1]] = 'x';
         });
 
-        console.table(board);
-
         // place white amazon on board
         let amazonNum = this.chessToNum(this.amazon);
         board[amazonNum[0]][amazonNum[1]] = 'A';
@@ -190,14 +188,12 @@ class AmazonCheckmate {
         let blocked = this.whiteKingReaches();
         blocked.forEach((pos) => {
             let coord = this.chessToNum(pos);
-            // if (board[coord[0]][coord[1]] != 'A') {
-                board[coord[0]][coord[1]] = 'b';
-            // }
+            board[coord[0]][coord[1]] = 'b';
         });
 
         // also need to check if amazon is on same diagonal as king because she cant get behind him
         if (this.checkSameDiagonal(this.amazon, this.king)) {
-            
+
             /*  if on same "diagonal" there are 8 possible configurations
                 1 - 2: king can be above or below of amazon
                     1: above -> same char but larger number
@@ -214,7 +210,7 @@ class AmazonCheckmate {
             */
             const deltaX = kingNum[1] - amazonNum[1]; // chars
             const deltaY = kingNum[0] - amazonNum[0]; // nums
-            
+
             if (deltaX == 0 && deltaY > 0) {
                 // console.log('1: above -> same char but larger number');
                 for ( let i = kingNum[0]; i < 8; i++) {
@@ -282,10 +278,6 @@ class AmazonCheckmate {
             }
         }
 
-        // reverse board to reflect picture in task
-        // board.reverse();
-        // console.table(board);
-
         /*
             it's checkmate (i.e. black's king is under the amazon's attack and it cannot make a valid move)
             i.e all cells directly neigbouring the amazon
@@ -294,11 +286,11 @@ class AmazonCheckmate {
             i.e all cells that amazon can reach but dont directly neigbour her
 
             it's stalemate (i.e. black's king is on a safe square but it cannot make a valid move)
-            i.e all cells where the amazon cant reach 
+            i.e all cells where the amazon cant reach
 
-            black's king is on a safe square and it can make a valid move. 
+            black's king is on a safe square and it can make a valid move.
         */
-        
+
         let safe = 0;
         let stalemate = 0;
         let check = 0;
@@ -313,6 +305,7 @@ class AmazonCheckmate {
                         [ 1,  0],
                         [ 1,  1]];
 
+        // returns true if there is a space where the black king can move; false otherwise
         const canMove = (coords: number[]): boolean => {
             for (let i = 0; i < offset.length; i++) {
                 let a = coords[0] + offset[i][0];
@@ -321,7 +314,7 @@ class AmazonCheckmate {
                 if (a < 0 || b < 0 || a > 7 || b > 7) {
                     continue;
                 }
-                
+
                 const offsetContent = board[a][b]
                 if (offsetContent == ' ' || offsetContent == 'A') {
                     return true;
@@ -330,7 +323,7 @@ class AmazonCheckmate {
 
             return false;
         }
-    
+
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 const cellContent = board[i][j];
@@ -355,7 +348,6 @@ class AmazonCheckmate {
                         // do noting for 'b', 'K', 'A'
                         break;
                 }
-
             }
         }
 
@@ -375,4 +367,3 @@ const task128Tasks = [
     new AmazonCheckmate(9, 'd4', 'h8', [0, 18, 0, 36]),
 ];
 task128Tasks.forEach(el => console.log(el.try()));
-// console.log(task128Tasks[0].calcSolution())

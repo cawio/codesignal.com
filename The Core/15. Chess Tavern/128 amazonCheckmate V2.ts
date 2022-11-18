@@ -99,7 +99,7 @@ class ChessPiecesMoves {
     }
 }
 
-class AmazonCheckmate {
+class AmazonCheckmate2 {
     chessNotationMap = new Map<string, number>([['a', 0], ['b', 1], ['c', 2], ['d', 3], ['e', 4], ['f', 5], ['g', 6], ['h', 7],
                                                 ['1', 7], ['2', 6], ['3', 5], ['4', 4], ['5', 3], ['6', 2], ['7', 1], ['8', 0]]);
     board: ChessCell[][];
@@ -131,7 +131,7 @@ class AmazonCheckmate {
     }
 }
 
-let forScience = new AmazonCheckmate('d3', 'e4').board;
+let forScience = new AmazonCheckmate2('d3', 'e4').board;
 
 console.log(forScience)
 console.table(forScience.map(row => {

@@ -16,7 +16,6 @@ class ChessBoard {
         // place pices on the board so i can use it when marking threatened cells
         piecesOnBoard.forEach(piece => this.board[piece[0]][piece[1]].inhabitant = piece[2]);
     }
-
 }
 
 class ChessCell {
@@ -31,6 +30,14 @@ class ChessCell {
 }
 
 class ChessPiecesMoves {
+    inRange (n: number): boolean {
+        if (n < 8 && n > -1) {
+            return true;
+        }
+        
+        return false;
+    }
+
     bishop(bishopCoords: number[], board: ChessCell[][]): void {
         const directions: number[][] = [[-1,  1], [ 1,  1], [-1, -1], [ 1, -1]];
         directions.forEach((direction: number[]) => {
@@ -52,27 +59,51 @@ class ChessPiecesMoves {
         const x = knightCoords[1];
         const y = knightCoords[0];
         offsets.forEach((offset: number[]) => {
+            
             const x1 = x + offset[0];
             const y1 = y + offset[1];
             const x2 = x + (-1 * offset[0]);
             const y2 = y + (-1 * offset[1]);
-            board[y1][x1].threatened = true;
-            board[y2][x2].threatened = true;
+            
+            if (this.inRange(x1) && this.inRange(y1)) {
+                board[y1][x1].threatened = true;
+            }
+            if (this.inRange(x2) && this.inRange(y2)) {
+                board[y2][x2].threatened = true;
+            }
         });
     }
 
     rook(rookCoords: number[], board: ChessCell[][]): void {
-        for (let i = 0; i < 8; i++) {
-            if (i == rookCoords[0]) {
-                continue;
+        let x = rookCoords[1];
+        let y = rookCoords[0];
+        
+        for (let i = y + 1; i < 8; i++) {
+            if (board[i][x].inhabitant != ChessPiece.Empty) {
+                break;
             }
-            board[i][rookCoords[1]].threatened = true;
+            board[i][x].threatened = true;
         }
-        for (let i = 0; i < 8; i++) {
-            if (i == rookCoords[1]) {
-                continue;
+
+        for (let i = y - 1; i > -1; i--) {
+            if (board[i][x].inhabitant != ChessPiece.Empty) {
+                break;
             }
-            board[rookCoords[0]][i].threatened = true;
+            board[i][x].threatened = true;
+        }
+
+        for (let i = x + 1; i < 8; i++) {
+            if (board[y][i].inhabitant != ChessPiece.Empty) {
+                break;
+            }
+            board[y][i].threatened = true;
+        }
+
+        for (let i = x - 1; i > -1; i--) {
+            if (board[y][i].inhabitant != ChessPiece.Empty) {
+                break;
+            }
+            board[y][i].threatened = true;
         }
     }
 
@@ -82,7 +113,7 @@ class ChessPiecesMoves {
         offsets.forEach((offset: number[]) => {
             let x = kingCoords[1] + offset[1];
             let y = kingCoords[0] + offset[0];
-            if (board[y][x] != undefined) {
+            if (this.inRange(x) && this.inRange(y)) {
                 board[y][x].blocked = true;
             }
         });
@@ -115,8 +146,8 @@ class AmazonCheckmate2 {
     }
 
     convertChessNotation(pos: string): number[] {
-        const col = pos.charAt(0);  // defines row spot in array (j)
-        const row = pos.substring(1);  // defines height in array (i)
+        const col = pos.charAt(0);      // defines row spot in array (j)
+        const row = pos.substring(1);   // defines height in array (i)
         const checkUndefined = (value: number | undefined): number => {
             if (value == undefined) {
                 throw new Error('input not valid chess notation')
@@ -129,23 +160,69 @@ class AmazonCheckmate2 {
 
         return [a, b];
     }
+
+    calcSolution(): number[] {
+        let safe = 0;
+        let stalemate = 0;
+        let check = 0;
+        let checkmate = 0;
+
+        const offset = [[-1, -1], [-1,  0], [-1,  1], [ 0,  1], [ 0, -1], [ 1, -1], [ 1,  0], [ 1,  1]];
+
+        const canMove = (coords: number[]): boolean => {
+            for (let i = 0; i < offset.length; i++) {
+                let a = coords[0] + offset[i][0];
+                let b = coords[1] + offset[i][1];
+
+                if (a < 0 || b < 0 || a > 7 || b > 7) {
+                    continue;
+                }
+
+                const surroudingCell = this.board[a][b];
+                if (surroudingCell.blocked || surroudingCell.inhabitant == ChessPiece.King) {
+                    continue;
+                }
+
+                if (surroudingCell.inhabitant == ChessPiece.Amazon) {
+                    // amazon not protected by white king
+                    return true;
+                }
+
+                if (!surroudingCell.threatened) {
+                    // black king has chance to move or escape
+                    return true;
+                }
+            }
+            
+            // either he cant go there because of restrictions or its threatened
+            return false;
+        }
+
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                const currentCell = this.board[i][j];
+                const ableToMove =  canMove([i, j]);
+
+                if (currentCell.blocked || currentCell.inhabitant != ChessPiece.Empty) {
+                    continue;
+                }
+
+                if (!currentCell.threatened && ableToMove) {
+                    safe++;
+                } else if (!currentCell.threatened && !ableToMove) {
+                    stalemate++;
+                } else if (currentCell.threatened && ableToMove) {
+                    check++;
+                } else if (currentCell.threatened && !ableToMove) {
+                    checkmate++;
+                }
+            }
+        }
+
+        return [checkmate, check, stalemate, safe];
+    }
 }
 
-let forScience = new AmazonCheckmate2('d3', 'e4').board;
+let test: AmazonCheckmate2 = new AmazonCheckmate2('f3', 'f2');
 
-console.log(forScience)
-console.table(forScience.map(row => {
-    return row.map(el => {
-        if (el.blocked) {
-            return 'b';
-        } else if (el.threatened) {
-            return 'x';
-        } else if (el.inhabitant == ChessPiece.Amazon) {
-            return 'A';
-        } else if (el.inhabitant == ChessPiece.King) {
-            return 'K';
-        } else {
-            return ' ';
-        }
-    })
-}));
+console.log(test.calcSolution());

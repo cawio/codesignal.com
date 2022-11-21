@@ -51,18 +51,14 @@ class Befunge93 {
         }
     }
 
-    private safePop(): number {
-        let n: number | undefined = this.stack.pop();
-        if (n == undefined) {
-            n = 0;
-        }
-
-        return n;
-    }
-
     public runProgram(): string {
         let d = Step.Right; // 1 = Up; 2 = Down; 3 = Right (default); 4 = Left
         let stopProgram = false;
+
+        const safePop = (): number => {
+            return this.stack?.pop() || 0;
+        }
+
         for (let i = 0; i < 10e5; i++) {
             let c = this.programm[this.row][this.col]; // command
             let a = 0;
@@ -90,7 +86,7 @@ class Befunge93 {
                     break;
                 case '_':
                     // pop a value; move right if value = 0, left otherwise
-                    if (this.safePop() == 0) {
+                    if (safePop() == 0) {
                         d = Step.Right;
                     } else {
                         d = Step.Left;
@@ -98,7 +94,7 @@ class Befunge93 {
                     break;
                 case '|':
                     // pop a value; move down if value = 0, up otherwise
-                    if (this.safePop() == 0) {
+                    if (safePop() == 0) {
                         d = Step.Down;
                     } else {
                         d = Step.Up;
@@ -106,37 +102,37 @@ class Befunge93 {
                     break;
                 case '+':
                     // addition; pop a, pop b, then push a + b
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     this.stack.push(a + b);
                     break;
                 case '-':
                     // subtraction; pop a, pop b, then push b - a
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     this.stack.push(b - a);
                     break;
                 case '*':
                     // multiplication; pop a, pop b, then push a * b
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     this.stack.push(a * b);
                     break;
                 case '/':
                     // integer division; pop a, pop b, then push b / a
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     this.stack.push(Math.trunc(b / a));
                     break;
                 case '%':
                     // modulo operation; pop a, pop b, then push b % a
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     this.stack.push(b % a);
                     break;
                 case '!':
                     // logical NOT; pop a value, if the value = 0, push 1, otherwise push 0
-                    a = this.safePop();
+                    a = safePop();
                     if (a == 0) {
                         this.stack.push(1);
                     } else {
@@ -145,8 +141,8 @@ class Befunge93 {
                     break;
                 case '`':
                     // greater than; pop a and b, then push 1 if b > a, otherwise 0
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     if (b > a) {
                         this.stack.push(1);
                     } else {
@@ -155,26 +151,26 @@ class Befunge93 {
                     break;
                 case ':':
                     // duplicate value on top of the stack
-                    a = this.safePop();
+                    a = safePop();
                     this.stack.push(a, a);
                     break;
                 case '\\':
                     // swap the top stack value with the second to the top
-                    a = this.safePop();
-                    b = this.safePop();
+                    a = safePop();
+                    b = safePop();
                     this.stack.push(a, b);
                     break;
                 case '$':
                     // pop value from the stack and discard it
-                    this.safePop();
+                    safePop();
                     break;
                 case '.':
                     // pop value and output it as an integer followed by a space
-                    this.output = this.output.concat(String(this.safePop()), ' ');
+                    this.output = this.output.concat(String(safePop()), ' ');
                     break;
                 case ',':
                     // pop value and this.output it as ASCII character
-                    a = this.safePop();
+                    a = safePop();
                     this.output = this.output.concat(String.fromCharCode(a));
                     break;
                 case '0':

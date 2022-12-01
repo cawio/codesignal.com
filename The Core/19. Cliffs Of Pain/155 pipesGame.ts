@@ -1,14 +1,16 @@
-enum GameElement {
+enum TileType {
+    // non pipe tiles
     Empty = 0,
     Source,
     Sink,
-    Vertical,
-    Horizontal,
-    BottomAndRight,
-    BottomAndLeft,
-    TopAndLeft,
-    TopAndRight,
-    VertAndHor
+    // pipes -> specifying where the openings are
+    LeftRight,
+    TopBottom,
+    BottomRight,
+    BottomLeft,
+    TopLeft,
+    TopRight,
+    LeftRightTopBottom
 }
 
 enum Status {
@@ -17,11 +19,11 @@ enum Status {
 }
 
 enum Flow {
-    NoFlow  = 0,
-    Up      = 1,
-    Down    = 2,
-    Left    = 3,
-    Right   = 4
+    NoFlow = 0,
+    Up = 1,
+    Down = 2,
+    Left = 3,
+    Right = 4
 }
 
 interface PositionObj {
@@ -32,14 +34,14 @@ interface PositionObj {
 class Tile {
     id: string;
     position: PositionObj;
-    type: GameElement;
+    type: TileType;
     status = Status.Empty;
 
     constructor (
         id: string,
         y: number,
         x: number,
-        type: GameElement
+        type: TileType
         ) {
         this.id = id;
         this.position = {y: y, x: x};
@@ -62,44 +64,43 @@ class PipesGameBoard {
                 .map((el, j) => {
                     if (el == '0') {
                         //empty field
-                        return new Tile(' ', i, j, GameElement.Empty);
+                        return new Tile(' ', i, j, TileType.Empty);
                     } else if (isNaN(Number(el))) {
                         if (/[A-Z]/.test(el)) {
                             // Capital letters -> sink
-                            new Tile(el, i, j, GameElement.Sink)
-                            return new Tile(el, i, j, GameElement.Sink);
+                            return new Tile(el, i, j, TileType.Sink);
                         }
                         // lowercase letters -> source
                         this.sources.push({y: i, x: j});
-                        return new Tile(el, i, j, GameElement.Source);
+                        return new Tile(el, i, j, TileType.Source);
                     } else {
                         // rest are pipes
-                        let tmp = new Tile('p', i, j, GameElement.Empty);
+                        let tmp = new Tile('p', i, j, TileType.Empty);
                         switch (el) {
                             case '1':
                                 // vertical pipe
-                                tmp.type = GameElement.Vertical;
+                                tmp.type = TileType.LeftRight;
                                 break;
                             case '2':
                                 // horizontal pipe
-                                tmp.type = GameElement.Horizontal;
+                                tmp.type = TileType.TopBottom;
                                 break;
                             case '3':
                                 // corners
-                                tmp.type = GameElement.BottomAndRight;
+                                tmp.type = TileType.BottomRight;
                                 break;
                             case '4':
-                                tmp.type = GameElement.BottomAndLeft;
+                                tmp.type = TileType.BottomLeft;
                                 break;
                             case '5':
-                                tmp.type = GameElement.TopAndLeft;
+                                tmp.type = TileType.TopLeft;
                                 break;
                             case '6':
-                                tmp.type = GameElement.TopAndRight;
+                                tmp.type = TileType.TopRight;
                                 break;
                             case '7':
                                 // + shape
-                                tmp.type = GameElement.VertAndHor;
+                                tmp.type = TileType.LeftRightTopBottom;
                                 break;
                             }
 
@@ -111,31 +112,31 @@ class PipesGameBoard {
 }
 
 interface PipeComp {
-    pipe: GameElement;
+    pipe: TileType;
     flow: Flow;
-    comp: GameElement[];
+    comp: TileType[];
 }
 
 class PipesGame {
     private game: PipesGameBoard;
     private curPos:  PositionObj = {y: 0, x: 0};
     readonly compabilities: PipeComp[] = [
-        {pipe: GameElement.Vertical, flow: Flow.Up, comp: [GameElement.Vertical, GameElement.BottomAndRight, GameElement.BottomAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.Vertical, flow: Flow.Down, comp: [GameElement.Vertical, GameElement.TopAndLeft, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.Horizontal, flow: Flow.Left, comp: [GameElement.Horizontal, GameElement.BottomAndRight, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.Horizontal, flow: Flow.Right, comp: [GameElement.Horizontal, GameElement.BottomAndLeft, GameElement.TopAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.BottomAndRight, flow: Flow.Left, comp: [GameElement.Vertical, GameElement.TopAndLeft, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.BottomAndRight, flow: Flow.Up, comp: [GameElement.Horizontal, GameElement.BottomAndLeft, GameElement.TopAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.BottomAndLeft, flow: Flow.Right, comp: [GameElement.Vertical, GameElement.TopAndLeft, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.BottomAndLeft, flow: Flow.Up, comp: [GameElement.Horizontal, GameElement.BottomAndRight, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.TopAndLeft, flow: Flow.Down, comp: [GameElement.Horizontal, GameElement.BottomAndRight, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.TopAndLeft, flow: Flow.Right, comp: [GameElement.Vertical, GameElement.BottomAndRight, GameElement.BottomAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.TopAndRight, flow: Flow.Down, comp: [GameElement.Horizontal, GameElement.BottomAndLeft, GameElement.TopAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.TopAndRight, flow: Flow.Left, comp: [GameElement.Vertical, GameElement.BottomAndRight, GameElement.BottomAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.VertAndHor, flow: Flow.Up, comp: [GameElement.Vertical, GameElement.BottomAndRight, GameElement.BottomAndLeft, GameElement.VertAndHor]},
-        {pipe: GameElement.VertAndHor, flow: Flow.Down, comp: [GameElement.Vertical, GameElement.TopAndLeft, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.VertAndHor, flow: Flow.Left, comp: [GameElement.Horizontal, GameElement.BottomAndRight, GameElement.TopAndRight, GameElement.VertAndHor]},
-        {pipe: GameElement.VertAndHor, flow: Flow.Right, comp: [GameElement.Horizontal, GameElement.BottomAndLeft, GameElement.TopAndLeft, GameElement.VertAndHor]}
+        {pipe: TileType.LeftRight, flow: Flow.Up, comp: [TileType.LeftRight, TileType.BottomRight, TileType.BottomLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.LeftRight, flow: Flow.Down, comp: [TileType.LeftRight, TileType.TopLeft, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.TopBottom, flow: Flow.Left, comp: [TileType.TopBottom, TileType.BottomRight, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.TopBottom, flow: Flow.Right, comp: [TileType.TopBottom, TileType.BottomLeft, TileType.TopLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.BottomRight, flow: Flow.Left, comp: [TileType.LeftRight, TileType.TopLeft, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.BottomRight, flow: Flow.Up, comp: [TileType.TopBottom, TileType.BottomLeft, TileType.TopLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.BottomLeft, flow: Flow.Right, comp: [TileType.LeftRight, TileType.TopLeft, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.BottomLeft, flow: Flow.Up, comp: [TileType.TopBottom, TileType.BottomRight, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.TopLeft, flow: Flow.Down, comp: [TileType.TopBottom, TileType.BottomRight, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.TopLeft, flow: Flow.Right, comp: [TileType.LeftRight, TileType.BottomRight, TileType.BottomLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.TopRight, flow: Flow.Down, comp: [TileType.TopBottom, TileType.BottomLeft, TileType.TopLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.TopRight, flow: Flow.Left, comp: [TileType.LeftRight, TileType.BottomRight, TileType.BottomLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.LeftRightTopBottom, flow: Flow.Up, comp: [TileType.LeftRight, TileType.BottomRight, TileType.BottomLeft, TileType.LeftRightTopBottom]},
+        {pipe: TileType.LeftRightTopBottom, flow: Flow.Down, comp: [TileType.LeftRight, TileType.TopLeft, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.LeftRightTopBottom, flow: Flow.Left, comp: [TileType.TopBottom, TileType.BottomRight, TileType.TopRight, TileType.LeftRightTopBottom]},
+        {pipe: TileType.LeftRightTopBottom, flow: Flow.Right, comp: [TileType.TopBottom, TileType.BottomLeft, TileType.TopLeft, TileType.LeftRightTopBottom]}
     ];
 
     constructor (
@@ -146,8 +147,8 @@ class PipesGame {
         this.game = new PipesGameBoard(this.state);
     }
 
-    private determineFlow(pipe: GameElement, flowDir: Flow): Flow {
-        if (pipe == GameElement.BottomAndRight) {
+    private determineFlow(pipe: TileType, flowDir: Flow): Flow {
+        if (pipe == TileType.BottomRight) {
             switch(flowDir) {
                 case Flow.Up:
                     flowDir = Flow.Right;
@@ -156,7 +157,7 @@ class PipesGame {
                     flowDir = Flow.Down;
                     break;
             }
-        } else if (pipe == GameElement.BottomAndLeft) {
+        } else if (pipe == TileType.BottomLeft) {
             switch(flowDir) {
                 case Flow.Up:
                     flowDir = Flow.Left;
@@ -165,7 +166,7 @@ class PipesGame {
                     flowDir = Flow.Down;
                     break;
             }
-        } else if (pipe == GameElement.TopAndLeft) {
+        } else if (pipe == TileType.TopLeft) {
             switch(flowDir) {
                 case Flow.Down:
                     flowDir = Flow.Left;
@@ -174,7 +175,7 @@ class PipesGame {
                     flowDir = Flow.Up;
                     break;
             }
-        } else if (pipe == GameElement.TopAndRight) {
+        } else if (pipe == TileType.TopRight) {
             switch(flowDir) {
                 case Flow.Down:
                     flowDir = Flow.Right;
@@ -188,7 +189,7 @@ class PipesGame {
         return flowDir;
     }
 
-    private compatible(p1: GameElement, p2: GameElement, d: Flow): boolean {
+    private compatible(p1: TileType, p2: TileType, d: Flow): boolean {
         return this.compabilities.some(option => {
             if(option.pipe == p1 && option.flow == d && option.comp.includes(p2)) {
                 return true;
@@ -214,8 +215,8 @@ class PipesGame {
         this.curPos.x -= 1;
     }
 
-    private flow(d: number): void {
-        switch(d) {
+    private flow(dir: number): void {
+        switch(dir) {
             case Flow.Up:
                 this.flowUp();
                 break;
@@ -233,15 +234,15 @@ class PipesGame {
 
     calcSolution(): number {
         type OffsetFlowPair = {
-            pipeType: GameElement;
+            pipeType: TileType;
             flow: Flow;
         }
 
         const sourceConnectors: OffsetFlowPair[] = [
-            {pipeType: GameElement.VertAndHor, flow: Flow.Right},
-            {pipeType: GameElement.VertAndHor, flow: Flow.Left},
-            {pipeType: GameElement.VertAndHor, flow: Flow.Up},
-            {pipeType: GameElement.VertAndHor, flow: Flow.Down}
+            {pipeType: TileType.LeftRightTopBottom, flow: Flow.Right},
+            {pipeType: TileType.LeftRightTopBottom, flow: Flow.Left},
+            {pipeType: TileType.LeftRightTopBottom, flow: Flow.Up},
+            {pipeType: TileType.LeftRightTopBottom, flow: Flow.Down}
         ];
 
         const invalidPos = (pos: PositionObj): boolean => {
@@ -258,8 +259,8 @@ class PipesGame {
         }
 
         const leaking = (pos: PositionObj): boolean => {
-            if (getElementAtPos(pos).type == GameElement.Empty ||
-                getElementAtPos(pos).type == GameElement.Source) {
+            if (getElementAtPos(pos).type == TileType.Empty ||
+                getElementAtPos(pos).type == TileType.Source) {
                     return true;
             }
 
@@ -268,7 +269,7 @@ class PipesGame {
 
         const wrongSink = (pos: PositionObj, target: string): boolean => {
             const el = getElementAtPos(pos);
-            if(el.type != GameElement.Sink) {
+            if(el.type != TileType.Sink) {
                 return false;
             }
             if (el.id != target) {
@@ -278,13 +279,13 @@ class PipesGame {
             return false;
         }
 
-        type GameData = {
+        type PathData = {
             length: number;
             alreadyFull: number;
             leaked: boolean;
         }
 
-        let gameData: GameData[] = [];
+        let gameData: PathData[] = [];
         for (let i = 0; i < this.game.sources.length; i++) {
             for (let j = 0; j < sourceConnectors.length; j++) {
                 this.curPos = JSON.parse(JSON.stringify(this.game.sources[i]));
@@ -293,58 +294,55 @@ class PipesGame {
 
                 // move
                 this.flow(curDir);
-
+                
                 // check invalid positon and compatibility
                 if (invalidPos(this.curPos) || !this.compatible(sourceConnectors[j].pipeType, getElementAtPos(this.curPos).type, curDir)) {
                     continue;
                 }
-
-                let pathData: GameData = {
+                
+                let currentTile = getElementAtPos(this.curPos);
+                let pathData: PathData = {
                     length: 0,
                     alreadyFull: 0,
                     leaked: false
                 }
-
-                if (getElementAtPos(this.curPos).status == Status.Empty) {
-                    pathData.length++;
-                    this.game.board[this.curPos.y][this.curPos.x].status = Status.Full;
-                } else {
-                    pathData.alreadyFull++;
-                }
-
-                curDir = this.determineFlow(getElementAtPos(this.curPos).type, curDir);
+                curDir = this.determineFlow(currentTile.type, curDir);
 
                 // continue along path
-                while (!invalidPos(this.curPos) || this.compatible(sourceConnectors[j].pipeType, getElementAtPos(this.curPos).type, curDir)) {
+                while (!invalidPos(this.curPos) || this.compatible(sourceConnectors[j].pipeType, currentTile.type, curDir)) {
+                    if (currentTile.status == Status.Empty) {
+                        pathData.length++;
+                        currentTile.status = Status.Full;
+                    } else {
+                        pathData.alreadyFull++;
+                    }
+
+                    // move
                     this.flow(curDir);
+
+                    // check if invalid Position after moving
                     if (invalidPos(this.curPos)) {
                         // leaking out of bounds
                         pathData.leaked = true;
                         break;
                     }
 
+                    // set currentTile
+                    currentTile = getElementAtPos(this.curPos);
+                    
                     if (leaking(this.curPos) || wrongSink(this.curPos, targetID)) {
                         // leaking or wrong sink
                         pathData.leaked = true;
                         break;
                     }
 
-                    if (getElementAtPos(this.curPos).id == targetID) {
+                    if (currentTile.id == targetID) {
                         // got to a valid sink
                         break;
                     }
 
                     // if necessary change flow direction
-                    curDir = this.determineFlow(getElementAtPos(this.curPos).type, curDir);
-
-                    if (getElementAtPos(this.curPos).status == Status.Empty) {
-                        // set status to full and add 1 to path length
-                        this.game.board[this.curPos.y][this.curPos.x].status = Status.Full;
-                        pathData.length++;
-                    } else {
-                        pathData.alreadyFull++;
-                    }
-
+                    curDir = this.determineFlow(currentTile.type, curDir);
                 }
 
                 gameData.push(pathData);
@@ -353,45 +351,31 @@ class PipesGame {
 
         let result = 0;
         if (gameData.some(el => el.leaked)) {
-            // determine shortest path where a leak occured
+            // determine where 'game over' occured first
             let pathsWithLeak = gameData.filter(path => path.leaked);
             let pathLenghts: number[] = pathsWithLeak.map(path => {
                 return path.length + path.alreadyFull;
             });
+
             let min = Math.min(...pathLenghts);
 
             // if path length is shorter then min add path length to result
             // otherwise add min to result
             gameData.forEach(path => {
-                if (path.length > min) {
-                    result += min;
-                } else {
-                    result += path.length;
-                }
+                result += Math.min(min, path.length);
             });
 
             // return for incorrect state has to be negativ
             result = -1 * (result);
         } else {
-            // sum up 
-            let filledPipes: number = gameData
+            // sum up path lenghts
+            result = gameData
                 .map(path => {
-                    return path.length + path.alreadyFull;
+                    return path.length;
                 })
                 .reduce((sum, pipes) => {
                     return sum += pipes;
             }, 0);
-
-            // sum up duplicate filled Pipes
-            let dupe = gameData
-                .map(path => {
-                    return path.alreadyFull
-                })
-                .reduce((sum, fullPipes) => {
-                    return sum += fullPipes
-                }, 0);
-
-            result = filledPipes - dupe
         }
 
         return result;

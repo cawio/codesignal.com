@@ -1,5 +1,3 @@
-// import { validateHeaderName } from "http";
-
 enum Swipe {
     Up = 0,
     Right = 1,
@@ -42,8 +40,9 @@ class Grid {
         }
     }
 
-    private shiftRight(row: Tile[]): Tile[] {    
+    private shiftRight(row: Tile[]): Tile[] {
         let array: Tile[] = row.filter((tile: Tile) => {
+
             return tile.val != 0;
         });
 
@@ -80,11 +79,10 @@ class Grid {
         for (let i = this.width - 1; i > 0; i--) {
             let n1 = row[i].val;
             let n2 = row[i - 1].val;
-            
+
             if (n1 == n2) {
                 row[i].val = n1 + n2;
                 row[i - 1].val = 0;
-                
             }
         }
 
@@ -99,7 +97,7 @@ class Grid {
             row = this.shiftRight(row);
 
             return row;
-        });        
+        });
     }
 }
 
@@ -134,42 +132,35 @@ class Game2048 {
         });
     }
 
-    private apply(input: Swipe): void {
-        let angle: number;
-        switch(input) {
-            case Swipe.Up:
-                // rotate 90° clockwise
-                angle = 90;
-                this.grid.rotateGrid(angle);
-                this.grid.onSwipe();
-                this.grid.rotateGrid(-angle);
-                break;
-            case Swipe.Right:
-                // dont need to rotate
-                this.grid.onSwipe();
-                break;
-            case Swipe.Down:
-                // rotate 90° counterclockwise
-                angle = -90;
-                this.grid.rotateGrid(angle);
-                this.grid.onSwipe();
-                this.grid.rotateGrid(-angle);
-                break;
-            case Swipe.Left:
-                // rotate 180° clockwise
-                angle = 180;
-                this.grid.rotateGrid(angle);
-                this.grid.onSwipe();
-                this.grid.rotateGrid(-angle);
-                break;
-            default:
-                throw new Error('incorrect input 😑');
-        }
+    private applyInput(angle: number): void {
+        this.grid.rotateGrid(angle);
+        this.grid.onSwipe();
+        this.grid.rotateGrid(-angle);
     }
 
     public applyUserInputs(): void {
         for (let input of this.userInputs) {
-            this.apply(input);
+            let angle: number;
+            switch(input) {
+                case Swipe.Up:
+                    // rotate 90° clockwise
+                    this.applyInput(90);
+                    break;
+                case Swipe.Right:
+                    // dont need to rotate
+                    this.grid.onSwipe();
+                    break;
+                case Swipe.Down:
+                    // rotate 90° counter clockwise
+                    this.applyInput(-90);
+                    break;
+                case Swipe.Left:
+                    // rotate 180° clockwise
+                    this.applyInput(180);
+                    break;
+                default:
+                    throw new Error('incorrect input 😑');
+            }
         }
     }
 
@@ -181,6 +172,7 @@ class Game2048 {
     public runTest(): string {
         this.applyUserInputs();
         const testPassed: boolean = JSON.stringify(this.expOut) == JSON.stringify(this.format());
+
         return `Test ${String(this.id).padStart(2, '0')}: ${testPassed ? 'passed 👍' : 'failed 👎'}`;
     }
 }
@@ -192,49 +184,49 @@ const task156Tests = [
          [0, 0, 2, 4],
          [2, 2, 4, 8]],
          "RR",
-        [[0, 0, 0, 0], 
-         [0, 0, 0, 4], 
-         [0, 0, 2, 4], 
+        [[0, 0, 0, 0],
+         [0, 0, 0, 4],
+         [0, 0, 2, 4],
          [0, 0, 8, 8]]
     ),
     new Game2048 (
         2,
-        [[0,0,0,2], 
-         [0,0,4,2], 
-         [0,0,4,2], 
+        [[0,0,0,2],
+         [0,0,4,2],
+         [0,0,4,2],
          [0,0,4,2]],
         'D',
-        [[0,0,0,0], 
-         [0,0,0,0], 
-         [0,0,4,4], 
+        [[0,0,0,0],
+         [0,0,0,0],
+         [0,0,4,4],
          [0,0,8,4]]
     ),
     new Game2048 (
         3,
-        [[0,2,2,0], 
-         [0,4,2,2], 
-         [2,4,4,8], 
+        [[0,2,2,0],
+         [0,4,2,2],
+         [2,4,4,8],
          [2,4,0,0]],
        "L",
-       [[4,0,0,0], 
-        [4,4,0,0], 
-        [2,8,8,0], 
+       [[4,0,0,0],
+        [4,4,0,0],
+        [2,8,8,0],
         [2,4,0,0]]
     ),
     new Game2048 (
         4,
-        [[0,0,0,2], 
-         [0,0,4,2], 
-         [0,0,4,2], 
+        [[0,0,0,2],
+         [0,0,4,2],
+         [0,0,4,2],
          [0,0,4,2]],
-       "DD",  
-       [[0,0,0,0], 
-        [0,0,0,0], 
-        [0,0,4,0], 
+       "DD",
+       [[0,0,0,0],
+        [0,0,0,0],
+        [0,0,4,0],
         [0,0,8,8]]
     ),
 ];
 
-task156Tests.forEach(el => { 
+task156Tests.forEach(el => {
     console.log(el.runTest())
 });

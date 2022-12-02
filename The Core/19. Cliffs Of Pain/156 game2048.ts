@@ -1,3 +1,5 @@
+// import { validateHeaderName } from "http";
+
 enum Swipe {
     Up = 0,
     Right = 1,
@@ -5,60 +7,99 @@ enum Swipe {
     Left = 3,
 }
 
-class Position {
-    constructor(
-        public y: number,
-        public x: number,
-    ) {}
-}
-
 class Tile {
-    readonly pos: Position;
-
     constructor (
-        y: number,
-        x: number,
-        public content: number,
-    ) {
-        this.pos = new Position(y, x);
+        public val: number,
+    ) {}
+
+    public setValue(n: number): void {
+        this.val = n;
+    }
+
+    public resetValue() {
+        this.val = 0;
+    }
+
+    public getValue(): number {
+        return this.val;
     }
 }
 
 class Grid {
-    board: Tile[][] = [];
-    width = 4;
-    height = 4;
+    grid: Tile[][] = [];
+    readonly width = 4;
+    readonly height = 4;
 
     constructor (
         gridState: number[][],
     ) {
         for (let i = 0; i < this.height; i++) {
-            this.board[i] = [];
+            this.grid[i] = [];
             for (let j = 0; j < this.width; j++) {
-                const el = gridState[i][j] != 0 ? gridState[i][j] : 0;
-                this.board[i][j] = new Tile(i, j, el);
+                const el = gridState[i][j];
+                this.grid[i][j] = new Tile(el);
             }
         }
     }
 
-    onSwipe() {
-        for (let i = 0; i < this.height; i++) {
-            for (let j = this.width - 1; j > 0; j--) {
-                const el1 = this.board[i][j].content;
-                const el2 = this.board[i][j - 1].content;
-                if (el1 == 0 || el2 == 0) {
-                    continue;
-                }
-                console.log(el1, el2)
+    private shiftRight(row: Tile[]): Tile[] {    
+        let array: Tile[] = row.filter((tile: Tile) => {
+            return tile.val != 0;
+        });
+
+        let rest: Tile[] = row.filter((tile: Tile) => {
+            return tile.val == 0;
+        });
+
+        array.unshift(...rest);
+
+        return array;
+    }
+
+    private getRotatedPos(cx: number, cy: number, x: number, y: number, angle: number): number[] {
+        const radians = (Math.PI / 180) * angle;
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+        const nx = (cos * (x - cx)) + (sin * (y - cy)) + cx;
+        const ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+
+        return [Math.round(nx), Math.round(ny)];
+    }
+
+    public rotateGrid(angle: number): void {
+        let gridCopy: Tile[][] = JSON.parse(JSON.stringify(this.grid));
+        this.grid.forEach((row, i) => {
+            row.forEach((_, j) => {
+                let newPos = this.getRotatedPos((this.height - 1) / 2, (this.width - 1) / 2, i, j, angle);
+                this.grid[newPos[0]][newPos[1]] = gridCopy[i][j];
+            });
+        });
+    }
+
+    private combine(row: Tile[]): Tile[] {
+        for (let i = this.width - 1; i > 0; i--) {
+            let n1 = row[i].val;
+            let n2 = row[i - 1].val;
+            
+            if (n1 == n2) {
+                row[i].val = n1 + n2;
+                row[i - 1].val = 0;
                 
-                if (el1 != el2) {
-                    continue;
-                }
-
-
-
             }
         }
+
+        return row;
+    }
+
+    public onSwipe() {
+        // shift all numbers to the right
+        this.grid = this.grid.map(row => {
+            row = this.shiftRight(row);
+            row = this.combine(row);
+            row = this.shiftRight(row);
+
+            return row;
+        });        
     }
 }
 
@@ -71,7 +112,10 @@ class Game2048 {
         path: string,
         readonly expOut: number[][],
     ) {
+        // init grid
         this.grid = new Grid(gridState);
+
+        // translate instructions
         path.split('').forEach(el => {
             switch(el) {
                 case 'U':
@@ -90,32 +134,53 @@ class Game2048 {
         });
     }
 
-    private applyUserInputs() {
-        for (let input of this.userInputs) {
-            switch(input) {
-                case Swipe.Up:
-                    // rotate 45° clockwise
-                    break;
-                case Swipe.Right:
-                    // dont need to rotate
-                    break;
-                case Swipe.Down:
-                    // rotate 45° counterclockwise
-                    break;
-                case Swipe.Left:
-                    // rotate 90° clockwise
-                    break;
-                default:
-                    throw new Error('incorrect input 😑');
-            }
-            this.grid.onSwipe();
-            
+    private apply(input: Swipe): void {
+        let angle: number;
+        switch(input) {
+            case Swipe.Up:
+                // rotate 90° clockwise
+                angle = 90;
+                this.grid.rotateGrid(angle);
+                this.grid.onSwipe();
+                this.grid.rotateGrid(-angle);
+                break;
+            case Swipe.Right:
+                // dont need to rotate
+                this.grid.onSwipe();
+                break;
+            case Swipe.Down:
+                // rotate 90° counterclockwise
+                angle = -90;
+                this.grid.rotateGrid(angle);
+                this.grid.onSwipe();
+                this.grid.rotateGrid(-angle);
+                break;
+            case Swipe.Left:
+                // rotate 180° clockwise
+                angle = 180;
+                this.grid.rotateGrid(angle);
+                this.grid.onSwipe();
+                this.grid.rotateGrid(-angle);
+                break;
+            default:
+                throw new Error('incorrect input 😑');
         }
     }
 
+    public applyUserInputs(): void {
+        for (let input of this.userInputs) {
+            this.apply(input);
+        }
+    }
+
+    public format(): number[][] {
+        let array = this.grid.grid.map(row => row.map(el => el.val));
+        return array;
+    }
+
     public runTest(): string {
-        this.applyUserInputs()
-        const testPassed: boolean = JSON.stringify(this.expOut) == JSON.stringify(this.grid.board.map(row => row.map(el => el.content ? el.content : 0)));
+        this.applyUserInputs();
+        const testPassed: boolean = JSON.stringify(this.expOut) == JSON.stringify(this.format());
         return `Test ${String(this.id).padStart(2, '0')}: ${testPassed ? 'passed 👍' : 'failed 👎'}`;
     }
 }
@@ -132,6 +197,44 @@ const task156Tests = [
          [0, 0, 2, 4], 
          [0, 0, 8, 8]]
     ),
+    new Game2048 (
+        2,
+        [[0,0,0,2], 
+         [0,0,4,2], 
+         [0,0,4,2], 
+         [0,0,4,2]],
+        'D',
+        [[0,0,0,0], 
+         [0,0,0,0], 
+         [0,0,4,4], 
+         [0,0,8,4]]
+    ),
+    new Game2048 (
+        3,
+        [[0,2,2,0], 
+         [0,4,2,2], 
+         [2,4,4,8], 
+         [2,4,0,0]],
+       "L",
+       [[4,0,0,0], 
+        [4,4,0,0], 
+        [2,8,8,0], 
+        [2,4,0,0]]
+    ),
+    new Game2048 (
+        4,
+        [[0,0,0,2], 
+         [0,0,4,2], 
+         [0,0,4,2], 
+         [0,0,4,2]],
+       "DD",  
+       [[0,0,0,0], 
+        [0,0,0,0], 
+        [0,0,4,0], 
+        [0,0,8,8]]
+    ),
 ];
 
-task156Tests.forEach(el => console.log(el.runTest()));
+task156Tests.forEach(el => { 
+    console.log(el.runTest())
+});

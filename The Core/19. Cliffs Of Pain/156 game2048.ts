@@ -6,9 +6,9 @@ enum Swipe {
 }
 
 class Tile {
-    constructor (
+    constructor(
         public val: number,
-    ) {}
+    ) { }
 
     public setValue(n: number): void {
         this.val = n;
@@ -28,7 +28,7 @@ class Grid {
     readonly width = 4;
     readonly height = 4;
 
-    constructor (
+    constructor(
         gridState: number[][],
     ) {
         for (let i = 0; i < this.height; i++) {
@@ -66,7 +66,15 @@ class Grid {
     }
 
     public rotateGrid(angle: number): void {
-        let gridCopy: Tile[][] = JSON.parse(JSON.stringify(this.grid));
+        let gridCopy: Tile[][] = [];
+        for (let i = 0; i < this.height; i++) {
+            gridCopy[i] = [];
+            for (let j = 0; j < this.width; j++) {
+                const el = this.grid[i][j].getValue();
+                gridCopy[i][j] = new Tile(el);
+            }
+        }
+
         this.grid.forEach((row, i) => {
             row.forEach((_, j) => {
                 let newPos = this.getRotatedPos((this.height - 1) / 2, (this.width - 1) / 2, i, j, angle);
@@ -104,7 +112,7 @@ class Grid {
 class Game2048 {
     private grid: Grid;
     private userInputs: Swipe[] = [];
-    constructor (
+    constructor(
         readonly id: number,
         gridState: number[][],
         path: string,
@@ -115,7 +123,7 @@ class Game2048 {
 
         // translate instructions
         path.split('').forEach(el => {
-            switch(el) {
+            switch (el) {
                 case 'U':
                     this.userInputs.push(Swipe.Up);
                     break;
@@ -140,8 +148,7 @@ class Game2048 {
 
     public applyUserInputs(): void {
         for (let input of this.userInputs) {
-            let angle: number;
-            switch(input) {
+            switch (input) {
                 case Swipe.Up:
                     // rotate 90° clockwise
                     this.applyInput(90);
@@ -176,54 +183,56 @@ class Game2048 {
         return `Test ${String(this.id).padStart(2, '0')}: ${testPassed ? 'passed 👍' : 'failed 👎'}`;
     }
 }
+
+// Test Cases
 const task156Tests = [
-    new Game2048 (
+    new Game2048(
         1,
         [[0, 0, 0, 0],
          [0, 0, 2, 2],
          [0, 0, 2, 4],
          [2, 2, 4, 8]],
-         "RR",
+        "RR",
         [[0, 0, 0, 0],
          [0, 0, 0, 4],
          [0, 0, 2, 4],
          [0, 0, 8, 8]]
     ),
-    new Game2048 (
+    new Game2048(
         2,
-        [[0,0,0,2],
-         [0,0,4,2],
-         [0,0,4,2],
-         [0,0,4,2]],
+        [[0, 0, 0, 2],
+         [0, 0, 4, 2],
+         [0, 0, 4, 2],
+         [0, 0, 4, 2]],
         'D',
-        [[0,0,0,0],
-         [0,0,0,0],
-         [0,0,4,4],
-         [0,0,8,4]]
+        [[0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [0, 0, 4, 4],
+         [0, 0, 8, 4]]
     ),
-    new Game2048 (
+    new Game2048(
         3,
-        [[0,2,2,0],
-         [0,4,2,2],
-         [2,4,4,8],
-         [2,4,0,0]],
+        [[0, 2, 2, 0],
+         [0, 4, 2, 2],
+         [2, 4, 4, 8],
+         [2, 4, 0, 0]],
        "L",
-       [[4,0,0,0],
-        [4,4,0,0],
-        [2,8,8,0],
-        [2,4,0,0]]
+        [[4, 0, 0, 0],
+         [4, 4, 0, 0],
+         [2, 8, 8, 0],
+         [2, 4, 0, 0]]
     ),
-    new Game2048 (
+    new Game2048(
         4,
-        [[0,0,0,2],
-         [0,0,4,2],
-         [0,0,4,2],
-         [0,0,4,2]],
-       "DD",
-       [[0,0,0,0],
-        [0,0,0,0],
-        [0,0,4,0],
-        [0,0,8,8]]
+        [[0, 0, 0, 2],
+         [0, 0, 4, 2],
+         [0, 0, 4, 2],
+         [0, 0, 4, 2]],
+        "DD",
+        [[0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [0, 0, 4, 0],
+         [0, 0, 8, 8]]
     ),
 ];
 

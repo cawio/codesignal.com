@@ -8,22 +8,16 @@ enum Directions {
 
 type Board = string[][];
 
-type OffsetArray = {x: number, y: number}[];
+type OffsetArray = { x: number, y: number }[];
 
 enum Snake {
   HEAD = 0,
   BODY = 1,
 }
 
-type Position = {
-  x: number;
-  y: number;
-}
+type Position = { x: number; y: number; };
 
-type SnakeBodyElement = {
-  position: Position;
-  type: Snake;
-}
+type SnakeBodyElement = { position: Position; type: Snake; };
 
 class SnakeGame {
   private snake: SnakeBodyElement[] = [];
@@ -146,7 +140,7 @@ class SnakeGame {
       }
 
       const offsetPositionIsNotSnake = !this.checkIfPositionIsSnake(offsetPosition);
-      if (offsetPositionIsNotSnake && board[offsetPosition.y][offsetPosition.x]== '*') {
+      if (offsetPositionIsNotSnake && board[offsetPosition.y][offsetPosition.x] == '*') {
         // set the new direction
         if (offset.x === 0 && offset.y === -1) {
           direction = Directions.UP;

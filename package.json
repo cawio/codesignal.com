@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "googleapis": "^113.0.0",
+    "lodash": "^4.17.21"
+  }
+}
